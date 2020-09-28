@@ -8,6 +8,8 @@ pygame.init()
 
 fps = 60
 
+clock = pygame.time.Clock()
+
 # Resolução
 
 WIDTH = 980
