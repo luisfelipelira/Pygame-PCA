@@ -1,7 +1,9 @@
 import os
 import pygame
+import menu
 from catador import Carro
 from player import Player
+
 
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 pygame.init()
@@ -13,7 +15,7 @@ clock = pygame.time.Clock()
 # Resolução
 
 WIDTH = 980
-HEIGHT = 980
+HEIGHT = 720
 
 # objetos
 
@@ -23,11 +25,11 @@ catador = Carro(objectGroup)
 
 # Janela
 
-screen = pygame.display.set_mode((HEIGHT, WIDTH))
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Trash Cleaner")
 
 # Fundo
-bg = pygame.image.load('Imagens/fundosemobjetos.png').convert()
+bg = pygame.image.load('Imagens/jogo/fundosemobjetos.png').convert()
 bg = pygame.transform.scale(bg, (WIDTH, HEIGHT))
 bg_y = 0
 
@@ -41,8 +43,6 @@ pygame.mixer.music.play(-1)
 
 enemies_spd = 0
 
-
-clock = pygame.time.Clock()
 janela_aberta = True
 while janela_aberta:
     clock.tick(fps)
@@ -62,9 +62,10 @@ while janela_aberta:
             if event.key == pygame.K_SPACE:
                 andar.play()
 
-    # Update
-    objectGroup.update()
-    pygame.display.update()
-    screen.fill((0, 0, 0))
+
+# Update
+objectGroup.update()
+pygame.display.update()
+screen.fill((0, 0, 0))
 
 pygame.quit()

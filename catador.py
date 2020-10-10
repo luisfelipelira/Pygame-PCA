@@ -10,7 +10,7 @@ class Carro(pygame.sprite.Sprite):
     def __init__(self, *groups):
         super().__init__(*groups)
 
-        self.image = pygame.image.load('Imagens/caminhãodelixo.png')
+        self.image = pygame.image.load('Imagens/jogo/caminhãodelixo.png')
         self.image = pygame.transform.scale(self.image, [140, 330])
         self.rect = pygame.Rect(440, 10, 100, 800)
         self.timer = 0
