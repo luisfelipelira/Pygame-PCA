@@ -1,9 +1,8 @@
 import pygame
-
+import time
 
 WIDTH = 720
 HEIGHT = 980
-
 
 clock = pygame.time.Clock()
 pygame.mixer.init()
@@ -34,11 +33,11 @@ class Player(pygame.sprite.Sprite):
         if comandos[pygame.K_LEFT]:
             self.rect.x -= 10
 
-#Limitando area do personagem andar
+        # Limitando area do personagem andar
         if self.rect.top < 200:
             self.rect.top = 200
-        if self.rect.bottom > WIDTH-20:
-            self.rect.bottom = WIDTH-20
+        if self.rect.bottom > WIDTH - 20:
+            self.rect.bottom = WIDTH - 20
         if self.rect.left < 120:
             self.rect.left = 120
         if self.rect.right > 895:

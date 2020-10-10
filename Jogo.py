@@ -1,9 +1,9 @@
 import os
+
 import pygame
-import menu
+
 from catador import Carro
 from player import Player
-
 
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 pygame.init()

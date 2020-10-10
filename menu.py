@@ -2,6 +2,7 @@ import pygame
 import shelve
 from catador import Carro
 from player import Player
+from lixos import Lixo
 import os
 
 
@@ -58,13 +59,13 @@ def menu():
             screen.blit(jogaralt, (WIDTH / 3.3, 288))
             if pygame.mouse.get_pressed()[0]:
 
-                fps = 60
-
                 # objetos
 
                 objectGroup = pygame.sprite.Group()
                 Player(objectGroup)
                 Carro(objectGroup)
+                Lixo(objectGroup)
+
 
                 # Fundo
                 bg = pygame.image.load('Imagens/jogo/fundosemobjetos.png').convert()
@@ -84,11 +85,11 @@ def menu():
                 clock = pygame.time.Clock()
                 # def jogo():
                 while True:
-                    clock.tick(fps)
+                    clock.tick(60)
 
                     # Faz o Fundo continuar infinito
                     bg_y1 = bg_y % bg.get_height()
-                    bg_y += 5
+                    bg_y += 2
                     screen.blit(bg, (0, bg_y1 - bg.get_height()))
                     if bg_y1 < HEIGHT:
                         screen.blit(bg, (0, bg_y1))
@@ -104,7 +105,7 @@ def menu():
                                 menu()
 
                     # Update
-                    objectGroup.update(0.1)
+                    objectGroup.update()
                     pygame.display.update()
                     screen.fill((0, 0, 0))
         else:
