@@ -34,6 +34,7 @@ class Player(pygame.sprite.Sprite):
         if comandos[pygame.K_LEFT]:
             self.rect.x -= 10
 
+#Limitando area do personagem andar
         if self.rect.top < 200:
             self.rect.top = 200
         if self.rect.bottom > WIDTH-20:
