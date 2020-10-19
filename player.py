@@ -1,5 +1,5 @@
 import pygame
-import time
+from time import sleep
 
 WIDTH = 720
 HEIGHT = 980
@@ -19,19 +19,20 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load('Imagens/jogo/boneco1.png')
         self.image = pygame.transform.scale(self.image, [69, 146])
         self.rect = pygame.Rect(460, 570, 100, 100)
-
+        #self.rect[image] = time.sleep(1)
     def update(self, *args):
         comandos = pygame.key.get_pressed()
         self.current_image = (self.current_image + 1) % 2
         self.image = self.images[self.current_image]
+        
         if comandos[pygame.K_UP]:
-            self.rect.y -= 10
+            self.rect.y -= 5
         if comandos[pygame.K_DOWN]:
-            self.rect.y += 10
+            self.rect.y += 5
         if comandos[pygame.K_RIGHT]:
-            self.rect.x += 10
+            self.rect.x += 5
         if comandos[pygame.K_LEFT]:
-            self.rect.x -= 10
+            self.rect.x -= 5
 
         # Limitando area do personagem andar
         if self.rect.top < 200:
