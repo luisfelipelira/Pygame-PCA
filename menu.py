@@ -1,137 +1,590 @@
 import pygame
-import shelve
+from tkinter import *
+from tkinter import messagebox
+
+from moviepy.editor import *
 
 from catador import Carro
 from player import Player
+from player import Lançar
 from lixos import LixoL
 from lixos import LixoR
 from lixos import tiro
+from buraco import buracos
 from time import sleep
-
+import lixos
+import buraco
 
 import math
-import time
 from random import randint
 import os
-
 
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 
 WIDTH = 980
 HEIGHT = 720
 
-
-
 pygame.init()
-save = shelve.open('save')
 pygame.display.set_caption("Trash Cleaner")
+tela = pygame.display.Info()
+width = tela.current_w - 386
+height = tela.current_h -48
+print(width, height)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-#Lançar_group = pygame.sprite.Group()
+surface = pygame.Surface((width,height), pygame.SRCALPHA)
 
+screenfull = 1
+
+def fullscreen_off(screen):
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    global screenfull
+    screenfull = 1
+    return screen
+
+def fullscreen_on(screen):
+    screen = pygame.display.set_mode((WIDTH, HEIGHT),pygame.FULLSCREEN)
+    global screenfull
+    screenfull = 2
+    return screen
 
 # Iniciando imagens, sons e fontes e arquivos
+invissible = (0, 0, 0, 0)
+cor = (0, 255, 0, 255)
+
+LIXOVELOCIDADE = 100
 
 titulo = pygame.image.load('imagens/menu/titulo.png')
+titulo = pygame.transform.scale(titulo, [410, 180])
 fundo = pygame.image.load('imagens/menu/fundo.png')
 
-jogar = pygame.image.load('imagens/menu/jogar.png')
-jogaralt = pygame.image.load('imagens/menu/jogaralt.png')
+jogar = pygame.image.load('imagens/menu/play.png')
+jogar_alt = pygame.image.load('imagens/menu/playalt.png')
 
 sair = pygame.image.load('imagens/menu/sair.png')
-sairalt = pygame.image.load('imagens/menu/sairalt.png')
+sair_alt = pygame.image.load('imagens/menu/sairalt.png')
 
 config = pygame.image.load('imagens/menu/config.png')
-configalt = pygame.image.load('imagens/menu/configalt.png')
+config_alt = pygame.image.load('imagens/menu/configalt.png')
+
+guide = pygame.image.load('imagens/menu/guide.png')
+guide_alt = pygame.image.load('imagens/menu/guidealt.png')
+
+cred = instruc = pygame.image.load('imagens/menu/cred.png')
+cred_alt = pygame.image.load('imagens/menu/credalt.png')
+
+pts = pygame.image.load('imagens/hud/pts2.png')
+mochila = pygame.image.load('imagens/hud/mochila2.png')
+time = pygame.image.load('imagens/hud/timer2.png')
+
+botao = [jogar, jogar_alt, sair, sair_alt]
+
+#MUSICAS
+menu_music = pygame.mixer.Sound('Sons/menu.ogg')
+jogo_music = pygame.mixer.Sound('Sons/jogo.ogg')
+hard_music = pygame.mixer.Sound('Sons/hard.wav')
+jogar_saco = pygame.mixer.Sound('Sons/jogar o saco.wav')
+click_music = pygame.mixer.Sound('Sons/click.ogg')
+
+menu_music.set_volume(0.5)
+jogo_music.set_volume(0.5)
+hard_music.set_volume(0.5)
+
+jogar_saco.set_volume(0.5)
+click_music.set_volume(0.5)
+
+#CONFIGURAÇOES
+
+seleçao = pygame.image.load('imagens/opçoes/dificuldade/seleçao.png')
+
+fundo_conf = pygame.image.load('imagens/opçoes/ret5.png')
+fundo_conf = pygame.transform.scale(fundo_conf, (width, height))
+
+sfx_titulo = pygame.image.load('imagens/opçoes/sfx/titulosfx.png')
+sfx_musica = pygame.image.load('imagens/opçoes/sfx/musica.png')
+sfx_ef = pygame.image.load('imagens/opçoes/sfx/efsonoros.png')
+sfx_mais = pygame.image.load('imagens/opçoes/sfx/+.png')
+sfx_menos = pygame.image.load('imagens/opçoes/sfx/-.png')
+
+sfx_click = pygame.image.load('imagens/opçoes/sfx/clique.png')
+sfx_barra = pygame.image.load('imagens/opçoes/sfx/separaçao.png')
+
+sfx_botao = [sfx_menos, sfx_mais]
+
+dificuldade_titulo = pygame.image.load('imagens/opçoes/dificuldade/titulo.png')
+facil = pygame.image.load('imagens/opçoes/dificuldade/facil.png')
+medio = pygame.image.load('imagens/opçoes/dificuldade/medio.png')
+dificil = pygame.image.load('imagens/opçoes/dificuldade/dificil.png')
+
+video_titulo = pygame.image.load('imagens/opçoes/video/video.png')
+full = pygame.image.load('imagens/opçoes/video/fullscreen.png')
+janela = pygame.image.load('imagens/opçoes/video/janela.png')
+
+aplicar = pygame.image.load('imagens/opçoes/botao/aplicar.png')
+aplicar_alt = pygame.image.load('imagens/opçoes/botao/aplicaralt.png')
+fechar = pygame.image.load('imagens/opçoes/botao/fechar.png')
+fechar_alt = pygame.image.load('imagens/opçoes/botao/fecharalt.png')
+
+#INSTRUÇÕES
+pag1 = pygame.image.load('imagens/instruçoes/pág1.png')
+pag1 = pygame.transform.scale(pag1, [width, height])
+
+pag2 = pygame.image.load('imagens/instruçoes/pág2.png')
+pag2 = pygame.transform.scale(pag2, [width, height])
+
+pag3 = pygame.image.load('imagens/instruçoes/pág3.png')
+pag3 = pygame.transform.scale(pag3, [width, height])
+
+pag4 = pygame.image.load('imagens/instruçoes/pág4.png')
+pag4 = pygame.transform.scale(pag4, [width, height])
+
+pag5 = pygame.image.load('imagens/instruçoes/pág5.png')
+pag5 = pygame.transform.scale(pag5, [width, height])
+
+proximo = pygame.image.load('imagens/instruçoes/go.png')
+proximo = pygame.transform.scale(proximo, (20, 24))
+
+proximo_alt = pygame.image.load('imagens/instruçoes/go_alt.png')
+proximo_alt = pygame.transform.scale(proximo_alt, (20, 24))
+
+anterior = pygame.image.load('imagens/instruçoes/back.png')
+anterior = pygame.transform.scale(anterior, (20, 24))
+
+anterior_alt = pygame.image.load('imagens/instruçoes/back_alt.png')
+anterior_alt = pygame.transform.scale(anterior_alt, (20, 24))
+
+#GAMEOVER
+gameover = pygame.image.load('imagens/game over/gameover.png')
+
+gameover_novamente = pygame.image.load('imagens/game over/jogar.png')
+gameover_novamente_alt = pygame.image.load('imagens/game over/jogaralt.png')
+
+gameover_sair = pygame.image.load('imagens/game over/sair.png')
+gameover_sair_alt = pygame.image.load('imagens/game over/sairalt.png')
 
 
-#music = pygame.mixer.Sound('Sons/music.wav')
 #passos = pygame.mixer.Sound('Sons/passos.wav')
 
-# Menu
-def menu():
-    # Coloca as imagens
-    screen.blit(fundo, (0, 0))
-    screen.blit(titulo, (WIDTH / 4.5, 0))
-    screen.blit(jogar, (WIDTH / 3.1, 300))
-    # screen.blit(jogaralt, (WIDTH / 4,0))
-    screen.blit(sair, (WIDTH / 3, 460))
-    # screen.blit(sairalt, (WIDTH / 4,0))
-    screen.blit(config, (900, 0))
-    # screen.blit(configalt, (800,0))
-    pygame.display.flip()
+clip = VideoFileClip('imagens/intro.mp4')
+clip.preview()
 
-    # Eventos clicáveis do Menu
+creditos = VideoFileClip('imagens/creditos.mp4')
 
-    while pygame.event.wait() or pygame.event.get():
+n = 10
+b = 0
+def game(n=10, b=0):
+    jogo(n, b)
 
-        # Pega a posição do mouse e
-        # (Posição hitbox direita) > Posição X do mouse > (Posição hitbox esquerda) and (Posição hitbox baixo)
-        # > Posição Y do mouse > (Posição hitbox cima) então:
-
-        mouse = pygame.mouse.get_pos()
-
-        if WIDTH / 3.1 + 359 > mouse[0] > WIDTH / 3.1 and 300 + 142 > mouse[1] > 300:
-            screen.blit(jogaralt, (WIDTH / 3.3, 288))
-            if pygame.mouse.get_pressed()[0]:
-                jogo()
-
-        else:
-            screen.blit(jogar, (WIDTH / 3.1, 300))
-
-        if WIDTH / 3 + 316 > mouse[0] > WIDTH / 3 and 460 + 115 > mouse[1] > 460:
-            screen.blit(sairalt, (WIDTH / 3, 460))
-            if pygame.mouse.get_pressed()[0]:
-                quit()
-        else:
-            screen.blit(sair, (WIDTH / 3, 460))
-
-        if 900 + 67 > mouse[0] > 900 and 0 + 67 > mouse[1] > 0:
-            screen.blit(configalt, (899, -1))
-
-        else:
-            screen.blit(config, (900, 0))
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-
-        pygame.display.flip()
-
-font_name = pygame.font.match_font('arial')
-def text(surf, text, size, x, y):
+font_name = pygame.font.match_font('berlin sans FB', True, True)
+def text(surf, text, size, x, y, cor): 
     font = pygame.font.Font(font_name, size)
-    text_surface = font.render(text, True, (255,255,255,0))
+    text_surface = font.render(text, True, cor)
     text_rect = text_surface.get_rect()
     text_rect.midtop = (x, y)
     surf.blit(text_surface, text_rect)
 
+def menu():
 
-# Game
-def jogo():
+    # Coloca as imagens
+    screen.blit(fundo, (0, 0))
+    screen.blit(titulo, (290, 0))
+
+    pygame.display.flip()
+
+    menu_music.stop()
+    jogo_music.stop()
+    hard_music.stop()
+    menu_music.play()
+
+    while pygame.event.wait() or pygame.event.get():
+
+        mouse = pygame.mouse.get_pos()
+        press = pygame.mouse.get_pressed()[0]
+
+        #JOGAR
+        if math.sqrt(((mouse[0] - 500)**2) + ((mouse[1] - 460)**2)) < 110:
+            screen.blit(jogar_alt, (390, 350))
+            if press:
+                click_music.play()
+                game(n, b)
+        else:
+            screen.blit(jogar, (390, 350))
+
+        #SAIR
+        if math.sqrt(((mouse[0] - 764)**2) + ((mouse[1] - 454)**2)) < 84:
+            screen.blit(sair_alt, (680, 370))
+            if press:
+                quit()
+        else:
+            screen.blit(sair, (680, 370))
+            
+        #CONFIG
+        if math.sqrt(((mouse[0] - 234)**2) + ((mouse[1] - 454)**2)) < 84:
+            screen.blit(config_alt, (150, 370))
+            if press:
+                click_music.play()
+                conf()
+        else:
+            screen.blit(config, (150, 370))
+            
+
+        #INSTRUÇOES
+        if 250 + 223 > mouse[0] > 250 and 630 + 65 > mouse[1] > 630:
+            screen.blit(guide_alt, (250, 630))
+            if press:
+                instruçoes()
+        else:
+            screen.blit(guide, (250, 630))
+
+        #CREDITOS
+        if 550 + 223 > mouse[0] > 550 and 630 + 65 > mouse[1] > 630:
+            screen.blit(cred_alt, (550,630))
+            if press:
+                if screenfull == 1:
+                    print('1')
+                    creditos.preview()
+                else:
+                    print('2')
+                    creditos.preview(fullscreen=True)
+                menu()
+
+        else:
+            screen.blit(cred, (550,630))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            
+        pygame.display.flip()
+
+def conf():
+    
+    ef_txt = 5
+    music_txt = 5
+    vol_ef = 0.5
+    vol_music = 0.5
+
+    #colocando na tela
+    screen.blit(fundo_conf, (0, 0))
+    pygame.draw.circle(surface, (0, 0, 0, 10), [100, 100], 7)
+
+    #audio
+    screen.blit(sfx_titulo, (200, 70))
+    screen.blit(sfx_ef, (100, 154))
+    screen.blit(sfx_musica, (205, 203))
+
+    screen.blit(sfx_botao[0], (300, 150))
+    screen.blit(sfx_botao[1], (382, 150))
+    screen.blit(sfx_barra, (370, 145))
+
+    screen.blit(sfx_botao[0], (300, 200))
+    screen.blit(sfx_botao[1], (382, 200))
+    screen.blit(sfx_barra, (370, 195))
+
+    #video
+    screen.blit(video_titulo, (670, 250))
+    screen.blit(janela, (600, 355))
+    screen.blit(full, (601, 390))
+
+    #dificuldade
+    screen.blit(dificuldade_titulo, (100, 350))
+    screen.blit(facil, (100, 450))
+    screen.blit(medio, (100, 485))
+    screen.blit(dificil, (100, 520))
+
+    screen.blit(aplicar, (width -320, height -90))
+    screen.blit(fechar, (width -140, height -90))
+
+    while pygame.event.wait() or pygame.event.get():
+        
+        mouse = pygame.mouse.get_pos()
+        press = pygame.mouse.get_pressed()
+
+        #CONTROLE DE VOLUME
+        if 300 + 62 > mouse[0] > 300 and 150 + 35 > mouse[1] > 150:
+            if press[0]:
+                screen.blit(sfx_click, (300, 150))
+                vol_ef -= 0.1
+                ef_txt -= 1               
+                print (vol_ef)
+            else:
+                screen.blit(sfx_botao[0], (300, 150))
+
+        if 382 + 62 > mouse[0] > 382 and 150 + 35 > mouse[1] > 150:
+            if press[0]:
+                screen.blit(sfx_click, (382, 150))
+                vol_ef += 0.1
+                ef_txt += 1
+
+                print (vol_ef)
+            else:
+                screen.blit(sfx_botao[1], (382, 150))
+        
+        if 300 + 62 > mouse[0] > 300 and 200 + 35 > mouse[1] > 200:
+            if press[0]:
+                screen.blit(sfx_click, (300, 200))
+                vol_music -= 0.1
+                music_txt -= 1
+                print (vol_music)
+            else:
+                screen.blit(sfx_botao[0], (300, 200))
+
+        if 382 + 62 > mouse[0] > 382 and 200 + 35 > mouse[1] > 200:
+            if press[0]:
+                screen.blit(sfx_click, (382, 200))
+                vol_music += 0.1
+                music_txt += 1
+                print (vol_music)
+            else:
+                screen.blit(sfx_botao[1], (382, 200))
+
+        #DISPLAY
+        #JANELA
+        if 600 + 182 > mouse[0] > 600 and 355 + 25 > mouse[1] > 355:
+            screen.blit(seleçao, (603, 358))
+            if press[0]:
+                fullscreen_off(screen)
+                conf()
+                for u in range(0, 10):
+                    screen.blit(janela, (600, 355))
+        else:
+            screen.blit(surface, (603-91, 357-90))
+
+        #FULLSCREEN
+        if 601 + 164 > mouse[0] > 601 and 390 + 23 > mouse[1] > 390:
+            screen.blit(seleçao, (603, 392))
+            if press[0]:
+                fullscreen_on(screen)
+                conf()
+                for u in range(0, 10):
+                    screen.blit(full, (601, 390))
+        else:
+            screen.blit(surface, (603-91, 392-90))
+        #DIFICULDADE
+        #FACIL
+        if 100 + 90 > mouse[0] > 100 and 450 + 25 > mouse[1] > 450:
+            screen.blit(seleçao, (100, 454))
+            if press[0]:
+                faci()
+                for u in range(0, 10):
+                    screen.blit(facil, (100, 450))
+        else:
+            screen.blit(surface, (100-91, 454-90))
+        
+        #MEDIO
+        if 100 + 100 > mouse[0] > 100 and 485 + 23 > mouse[1] > 485:
+            screen.blit(seleçao, (100, 489))
+            if press[0]:
+                medi()
+                for u in range(0, 10):
+                    screen.blit(medio, (100, 485))
+        else:
+            screen.blit(surface, (100-91, 489-90))
+            
+
+        #DIFICIL
+        if 100 + 100 > mouse[0] > 100 and 520 + 24 > mouse[1] > 520:
+            screen.blit(seleçao, (100, 524))
+            if press[0]:
+                difi()
+                for u in range(0, 10):
+                    screen.blit(dificil, (100, 520))
+        else:
+            screen.blit(surface, (100-91, 524-90))
+            
+
+        #APLICAR E SAIR
+        if (width-320) + 169 > mouse[0] > (width-320) and (height-90) + 58 > mouse[1] > (height-90):
+            screen.blit(aplicar_alt, (width -318, height -87))
+            if press[0]:
+                vol()
+                pygame.display.update()
+        else:
+            screen.blit(aplicar, (width -320, height -90))
+
+        if (width-140) + 105 > mouse[0] > (width-140) and (height-90) + 55 > mouse[1] > (height-90):
+            screen.blit(fechar_alt, (width -139, height -88))
+            if press[0]:
+                menu() 
+
+        else:
+            screen.blit(fechar, (width -140, height -90))
+    
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    menu()
+
+        def vol_min():
+            Tk().wm_withdraw()
+            messagebox.showwarning('ATENÇÃO', 'Volume Mínimo Alcançado')
+        def vol_max():
+            Tk().wm_withdraw()
+            messagebox.showwarning('ATENÇÃO', 'Volume Máximo Alcançado')
+
+        if vol_ef < 0:
+            vol_ef = 0
+            vol_min()
+
+        if vol_music < 0:
+            vol_music = 0
+            vol_min()
+
+        if vol_ef > 1:
+            vol_ef = 1
+            vol_max()
+
+        if vol_music > 1:
+            vol_music = 1
+            vol_max()
+        
+        pygame.display.flip()
+
+        def vol():
+            menu_music.set_volume(vol_music)
+            jogo_music.set_volume(vol_music)
+            hard_music.set_volume(vol_music)
+            jogar_saco.set_volume(vol_ef)
+            click_music.set_volume(vol_ef)
+    
+def instruçoes():
+    pags = 1
+    screen.blit(pag1, (0, 0))
+
+    while pygame.event.wait() or pygame.event.get():
+
+        if pags == 1:
+            screen.blit(pag1, (0, 0))
+        elif pags == 2:
+            screen.blit(pag2, (0, 0))
+        elif pags == 3:
+            screen.blit(pag3, (0, 0))
+        elif pags == 4:
+            screen.blit(pag4, (0, 0))
+        elif pags == 5:
+            screen.blit(pag5, (0, 0))
+        
+
+        mouse = pygame.mouse.get_pos()
+        press = pygame.mouse.get_pressed()[0]
+        comandos = pygame.key.get_pressed()
+
+        
+
+        if 530 + 20 > mouse[0] > 530 and 672 + 24 > mouse[1] > 672:
+            screen.blit(proximo, (530, 672))
+            if press:
+                pags +=1
+                pygame.display.flip()
+
+        if 435 + 20 > mouse[0] > 435 and 672 + 24 > mouse[1] > 672:
+            screen.blit(anterior, (435, 672))
+            if pygame.mouse.get_pressed()[0]:
+                pags -=1
+                pygame.display.flip()
+
+        
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+        if comandos[pygame.K_ESCAPE]:
+            menu()
+            
+
+        if pags <= 0:
+            pags = 5
+        elif pags >= 6:
+            pags = 1
+            
+        pygame.display.flip()
+
+def game_over():
+    screen.blit(gameover,(WIDTH/4.5, 200))
+    screen.blit(gameover_novamente, (150,580))
+    screen.blit(gameover_sair, (550,580))
+
+    pygame.display.flip()
+
+    while pygame.event.wait() or pygame.event.get():
+
+        mouse = pygame.mouse.get_pos()
+        press = pygame.mouse.get_pressed()[0]
+
+        #JOGAR
+        if 150 + 294 > mouse[0] > 150 and 580 + 95 > mouse[1] > 580:
+            screen.blit(gameover_novamente_alt, (150, 580))
+            if press:
+                jogo_music.stop()
+                jogo(n, b)
+        else:
+            screen.blit(gameover_novamente, (150, 580))
+
+        #SAIR
+        if 550 + 294 > mouse[0] > 550 and 580 + 95 > mouse[1] > 580:
+            screen.blit(gameover_sair_alt, (550,580))
+            if press:
+                menu()
+        else:
+            screen.blit(gameover_sair, (550,580))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            
+        pygame.display.flip()
+
+def faci():
+    lixos.LIXOVELOCIDADE = 10
+    global b
+    b = 0
+    global n
+    n = 10
+    Tk().wm_withdraw()
+    messagebox.showinfo('ATENÇÃO', 'DIFICULDADE DEFINIDA COMO FACIL')
+
+def medi():   
+    lixos.LIXOVELOCIDADE = 16
+    buraco.LIXOVELOCIDADE = 16
+    global b
+    b = 1
+    global n
+    n = 16
+    Tk().wm_withdraw()
+    messagebox.showinfo('ATENÇÃO', 'DIFICULDADE DEFINIDA COMO MEDIO')
+
+def difi():
+    lixos.LIXOVELOCIDADE = 22
+    buraco.LIXOVELOCIDADE = 22
+    global b
+    b = 2
+    global n
+    n = 22
+    Tk().wm_withdraw()
+    messagebox.showinfo('ATENÇÃO', 'DIFICULDADE DEFINIDA COMO DIFICIL')
+
+def jogo(n, b):
+    
     # objetos
-    temporizador = 0
-
     pontos = 0
-    pontosfeitos = 0
+    lixo_mochila = 50
     timer = 0
-    contagem = 0
+    buraco_time = 0
+    contagem = 60
+    collide = 0
+    t = 2
+    fps = 30
+    j = 0
+    x = 8
+    bu = b
 
     objectGroup = pygame.sprite.Group()
 
-    #lixos = LixoL(objectGroup)
-    #lixos.rect.center = [100, 100]
-    #lixos2 = LixoL(objectGroup)
-    #lixos.rect.center = [200, 200]
-    #lixos3 = LixoL(objectGroup)
-    #lixos.rect.center = [300, 300]
-
-
     Lixo_group = pygame.sprite.Group()
     tiro_group = pygame.sprite.Group()
-    #lixoL = LixoL()
-    #lixoR = LixoR()
-    #Lixo_group.add(lixoL)
-    #Lixo_group.add(lixoR)
+
+    buraco_group = pygame.sprite.Group()
 
     Player_group = pygame.sprite.Group()
     player = Player()
@@ -142,11 +595,6 @@ def jogo():
     Carro_group.add(carro)
 
     all_group = pygame.sprite.Group()
-    #all_group.add(player)
-    #all_group.add(carro)
-    #all_group.add(lançar)
-    #all_group.add(lixoL)
-    #all_group.add(lixoR)
 
     # Fundo
     bg = pygame.image.load('Imagens/jogo/fundosemobjetos.png').convert()
@@ -158,19 +606,23 @@ def jogo():
 
     # Música
 
-    # pygame.mixer_music.load("Sons/music.wav")
-    # pygame.mixer.music.play(-1)
+    menu_music.stop()
+    if bu == 0 or bu == 1:
+        jogo_music.play()
+    else:
+        hard_music.play()
 
-    # enemies_spd = 0
-
+    val = n
     clock = pygame.time.Clock()
-    while True:
-        clock.tick(150)
-
+    tela = True
+    while tela:
+        clock.tick(fps)
         # Faz o Fundo continuar infinito
         bg_y1 = bg_y % bg.get_height()
-        bg_y += 2
+        bg_y += val
+
         screen.blit(bg, (0, bg_y1 - bg.get_height()))
+
         if bg_y1 < HEIGHT:
             screen.blit(bg, (0, bg_y1))
         for event in pygame.event.get():
@@ -179,35 +631,58 @@ def jogo():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     menu()
-                if event.key == pygame.K_SPACE:
-                    atirar = tiro(objectGroup, tiro_group)
-                    if pontosfeitos >= 1:
-                        atirar.rect.center = player.rect.center
-                        pontosfeitos -= 1
+                if t > 15:
+                    if event.key == pygame.K_SPACE:
+                        t = 0
+                        atirar = tiro(objectGroup, tiro_group)
 
+                        if lixo_mochila >= 1:
+                            atirar.rect.center = player.rect.center
+                            lixo_mochila -= 1
+                            player.current_image = 0
+                            jogar_saco.stop()
+                            jogar_saco.play()
 
+        t += 1
         timer += 1
-        if timer == 60:
+        buraco_time += 1
+        collide += 1
+
+        if buraco_time == 60:
+            buraco_time = 0
+            if bu == 1:
+                buraco = buracos(objectGroup, buraco_group)
+            if bu == 2:
+                for y in range(0, 2):
+                    buraco = buracos(objectGroup, buraco_group)
+        if timer == fps:
             #time.sleep(0.1)
             timer = 0
             lixol = LixoL(objectGroup, Lixo_group)
             lixor = LixoR(objectGroup, Lixo_group)
-
-
+            contagem -= 1
+        
+        if contagem == 0:
+            game_over()
+            tela = False
 
         # Update
         objectGroup.update()
-        #objectGroup.draw(screen)
 
         #colisão
         if pygame.sprite.groupcollide(Lixo_group, Player_group, True, False):
-            pontosfeitos += 1
+            lixo_mochila += 1
 
         if pygame.sprite.groupcollide(tiro_group, Carro_group, True, False):
             pontos += 2
-
-        #Lixo_group.update()
-        #Lixo_group.draw(screen)
+        
+        if collide > 3:
+            if pygame.sprite.groupcollide(Player_group, buraco_group, False, False):
+                collide = 0
+                if lixo_mochila > 0:
+                    lixo_mochila -= 5
+                if lixo_mochila < 0:
+                    lixo_mochila = 0
 
         objectGroup.draw(screen)
 
@@ -220,12 +695,15 @@ def jogo():
         all_group.update()
         all_group.draw(screen)
 
-        text(screen, f"PONTOS: {pontos}", 30, 500, 0)
-        text(screen, f"Lixos na Mochila: {pontosfeitos}", 30, 250, 0)
-        text(screen, f"Faltam {contagem} segundos", 30, 750, 0)
+        screen.blit(pts, (15, 20))
+        screen.blit(mochila, (15, 80))
+        screen.blit(time, (655, 20))
 
+        text(screen, f"{pontos}", 50, 280, 15, (238, 175, 81, 0))
+        text(screen, f"{lixo_mochila}", 30, 260, 80, (238, 175, 81, 0))
+        text(screen, f"{contagem}", 30, 799, 22, (238, 175, 81, 0))
 
         pygame.display.update()
-        screen.fill((0, 0, 0))
+
 menu()
 pygame.quit()
